@@ -1,0 +1,21 @@
+<!-- templates/cart.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Shopping Cart</h1>
+    <ul>
+        {% for item in cart %}
+        <li>
+            {{ item['name'] }} - ${{ item['price'] }}
+            <a href="{{ item['url'] }}" target="_blank">Visit Product</a>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

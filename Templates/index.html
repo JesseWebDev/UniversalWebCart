@@ -1,0 +1,58 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+</head>
+<body>
+    <h1>Products</h1>
+
+
+
+<!-- templates/index.html -->
+
+<!-- ... (existing content) -->
+
+<!-- Product List -->
+<div class="container">
+    {% for product in products %}
+    <div class="product">
+        <h3>{{ product['name'] }}</h3>
+        <p>Price: {{ product['price'] }}</p>
+        <a href="{{ product['url'] }}" target="_blank">View Product Details</a>
+        <a href="/delete_product/{{ product['id'] }}">Delete Item</a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- templates/index.html -->
+
+<!-- ... (existing content) -->
+
+<!-- Form to add new product -->
+<form action="/add_product" method="POST" class="add-product-form">
+    <div class="input-group">
+        <label for="url">URL:</label>
+        <input type="text" id="url" name="url" class="url-input" required>
+    </div>
+    <div class="input-group">
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" class="price-input">
+    </div>
+    <input type="submit" value="Add Product" class="add-product-button">
+</form>
+
+
+
+
+
+
+
+
+</body>
+
+</html>
