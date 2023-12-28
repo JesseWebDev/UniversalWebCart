@@ -1,15 +1,14 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for
 from bs4 import BeautifulSoup
 import requests
+import json
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key_here'  # Set a secret key for sessions
 
-# Initial list of predefined products
-products = [
 
-    # Add more products here
-]
 
+# Function to fetch product details from a URL
 def get_product_details(url):
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -27,7 +26,21 @@ def get_product_details(url):
 
     return product_name, product_price, product_image
 
+# Function to load user-specific products from a JSON file based on user session
+def load_user_products():
+    if 'user_products' in session:
+        return session['user_products']
+    else:
+        return []
+
+# Function to save user-specific products to the session
+def save_user_products(user_products):
+    session['user_products'] = user_products
+
+
+
 # Define the function to handle adding a product
+@app.route('/add_product', methods=['POST'])
 def handle_add_product():
     if request.method == 'POST':
         url = request.form['url']
@@ -38,31 +51,34 @@ def handle_add_product():
         else:
             price = f'${price}'  # Prepend the dollar sign to the price value
 
-        product_name, product_price, product_image = get_product_details(url)
+        product_details = get_product_details(url)
 
-        existing_urls = [product['url'] for product in products]
+        if product_details:
+            product_name, product_price, product_image = product_details
 
-        if url not in existing_urls:
-            new_id = len(products) + 1
-            new_product = {'id': new_id, 'name': product_name, 'price': price, 'url': url, 'image': product_image}
-            products.append(new_product)
+            user_products = load_user_products()
 
-        return render_template('index.html', products=products)
+            existing_urls = [product['url'] for product in user_products]
 
-# Map the function to the desired route
-app.add_url_rule('/add_product', 'add_product', handle_add_product, methods=['POST'])
+            if url not in existing_urls:
+                new_id = len(user_products) + 1
+                new_product = {'id': new_id, 'name': product_name, 'price': price, 'url': url, 'image': product_image}
+                user_products.append(new_product)
 
-# Index route
+                # Save updated user-specific products to the session
+                save_user_products(user_products)
+                print("Product added successfully!")
+
+    return redirect(url_for('index'))
+
+# Define other routes...
+
 @app.route('/')
 def index():
-    return render_template('index.html', products=products)
+    user_products = load_user_products()
+    return render_template('index.html', products=user_products)
 
-# Delete product route
-@app.route('/delete_product/<int:product_id>')
-def delete_product(product_id):
-    global products
-    products = [product for product in products if product['id'] != product_id]
-    return render_template('index.html', products=products)
+# Other routes and functions...
 
 if __name__ == '__main__':
     app.run(debug=True)
